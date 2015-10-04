@@ -1,8 +1,8 @@
 @-------------------------------------------------------------------------
 @  Return of the Very Tiny Language (ARM)
-@  Copyright (C) 2003 - 2012 Jun Mizutani <mizutani.jun@nifty.ne.jp>
+@  Copyright (C) 2003 - 2015 Jun Mizutani <mizutani.jun@nifty.ne.jp>
 @  file : vtlfb.s  frame buffer extention
-@  2012/10/22
+@  2015/09/25
 @-------------------------------------------------------------------------
 
         stmfd   sp!, {lr}
@@ -103,7 +103,7 @@ func_fbt:
 @   d[2] = y      [v7,  #8] 転送先のY座標
 @   d[3] = Color  [v7, #12] 色
 @   d[4] = ScrX   [v7, #16] 転送先X方向のバイト数
-@   d[5] = Depth  [v7, #20] 1ピクセルのバイト数
+@   d[5] = Depth  [v7, #20] 1ピクセルのビット数
 Dot:
         stmfd   sp!, {v7, lr}
         mov     r3, #'d'            @ 引数は d[0] - d[5]
@@ -138,7 +138,7 @@ StartPoint:
 @ l[3] = x2     [v7, #+12]      @ l[4] = y2     [v7, #+16]
 @ l[5] = color  [v7, #+20]
 @ l[6] = ScrX   [v7, #+24]
-@ l[7] = Depth  [v7, #+28]      @ 1ピクセルのバイト数
+@ l[7] = Depth  [v7, #+28]      @ 1ピクセルのビット数
 @ l[8] = incr1  [v7, #+32]
 @ l[9] = incr2  [v7, #+36]
 @ v6 : framebuffer
@@ -305,7 +305,7 @@ PatternSize:
 @   p[4] = PatH   [v7, #+16] パターンの高さ
 @   p[5] = mem    [v7, #+20] パターンの格納アドレス
 @   p[6] = ScrX   [v7, #+24] 転送先X方向のバイト数
-@   p[7] = Depth  [v7, #+28] 1ピクセルのバイト数
+@   p[7] = Depth  [v7, #+28] 1ピクセルのビット数
 
 PatternTransfer:
         stmfd   sp!, {v5-v7, lr}
@@ -331,7 +331,7 @@ PatternTransfer:
 @   t[4] = PatH   [v7, #+16] パターンの高さ
 @   t[5] = mem    [v7, #+20] パターンの格納アドレス先頭
 @   t[6] = ScrX   [v7, #+24] 転送先のX方向のバイト数
-@   t[7] = Depth  [v7, #+28] 1ピクセルのバイト数
+@   t[7] = Depth  [v7, #+28] 1ピクセルのビット数
 @   t[8] = x2     [v7, #+32] 転送元のX座標
 @   t[9] = y2     [v7, #+36] 転送元のY座標
 @   t[10]= ScrX2  [v7, #+40] 転送元のX方向のバイト数
@@ -370,7 +370,7 @@ PatternTransfer2:
 @   q[4] = PatH   [v7, #+16] パターンの高さ
 @   q[5] = mem    [v7, #+20] パターンの格納アドレス
 @   q[6] = ScrX   [v7, #+24] X方向のバイト数
-@   q[7] = Depth  [v7, #+28] 1ピクセルのバイト数
+@   q[7] = Depth  [v7, #+28] 1ピクセルのビット数
 @   q[8] = Mask   [v7, #+32] マスク色
 MPatternTransfer:
         stmfd   sp!, {v4-v7, lr}
@@ -399,7 +399,7 @@ MPatternTransfer:
 @   r[4] = PatH   [v7, #+16] パターンの高さ
 @   r[5] = Color  [v7, #+20] パターンの色
 @   r[6] = ScrX   [v7, #+24] X方向のバイト数
-@   r[7] = Depth  [v7, #+28] 1ピクセルのバイト数
+@   r[7] = Depth  [v7, #+28] 1ピクセルのビット数
 
 PatternFill:
         stmfd   sp!, {v5-v7, lr}

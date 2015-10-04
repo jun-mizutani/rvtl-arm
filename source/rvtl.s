@@ -5,7 +5,7 @@
 @ 2009/03/15 arm eabi
 @ 2012/10/25 fix |fbo, UTF-8, ASLR
 @ 2013/04/25 fix |fbo for linux 3.6
-@ 2015/09/16 fix Environment variables (\\e), added |rt, |vc
+@ 2015/10/05 fix Environment variables (\\e), added |rt, |vc
 @ Copyright (C) 2003-2015 Jun Mizutani <mizutani.jun@nifty.ne.jp>
 @ rvtl.s may be copied under the terms of the GNU General Public License.
 @-------------------------------------------------------------------------
@@ -359,7 +359,7 @@ cgiflag:        .long   cgiflag0
 
 .ifndef SMALL_VTL
                 .align   2
-start_msg:      .ascii   "RVTL v.3.05arm 2015/09/16, (C)2003-2015 Jun Mizutani\n"
+start_msg:      .ascii   "RVTL v.3.05arm 2015/10/05, (C)2003-2015 Jun Mizutani\n"
                 .ascii   "RVTL may be copied under the terms of the GNU "
                 .asciz   "General Public License.\n"
                 .align   2
