@@ -5,6 +5,7 @@
 @ 2009/03/15 arm eabi
 @ 2012/10/24 Editor supports UTF-8.
 @ 2015/09/16 Added SET_TERMIOS2
+@ 2015/11/12 Change the mnemonic of SWI instruction to SVC
 @ Copyright (C) 2003-2015 Jun Mizutani <mizutani.jun@nifty.ne.jp>
 @ vtllib.s may be copied under the terms of the GNU General Public License.
 @-------------------------------------------------------------------------
@@ -895,7 +896,7 @@ GetDirectoryEntry:
         ldr     r2, size_dir_ent        @ dir_ent格納領域サイズ
         stmfd   sp!, {r7}               @ save v4
         mov     r7, #sys_getdents       @ dir_entを複数返す
-        swi     0
+        svc     0
         tst     r0, r0                  @ valid buffer length
         ldmfd   sp!, {r7}               @ restore v4
         blmi    SysCallError            @ システムコールエラー
@@ -960,7 +961,7 @@ GetFileStat:
         mov     r0, r3                  @ パス名先頭アドレス
         ldr     r1, file_stat           @ file_stat0のアドレス
         mov     r7, #sys_lstat          @ ファイル情報の取得
-        swi     0
+        svc     0
         tst     r0, r0                  @ valid buffer length
         blmi    SysCallError            @ システムコールエラー
         ldmfd   sp!, {r0-r3,v1,r7,pc}   @ return
@@ -1144,7 +1145,7 @@ IOCTL:
         mov     r1, r0                  @ set cmd
         mov     r0, #0                  @ 0 : to stdin
         mov     r7, #sys_ioctl
-        swi     0
+        svc     0
         ldmfd   sp!, {r1, r2, r7, pc}   @ return
 
 TC_GETS:    .long   TCGETS
@@ -1166,7 +1167,7 @@ RealKey:
         mov     r1, sp                  @ r1  address
         mov     r2, #1                  @ r2  length
         mov     r7, #sys_read
-        swi     0
+        svc     0
         ldmfd   sp!, {r1}               @ pop char
         tst     r0, r0                  @ if 0 then empty
         moveq   r4, r0
@@ -1188,7 +1189,7 @@ WinSize:
         ldr     r1, TIOCG_WINSZ         @ get wondow size
         ldr     r2, wsize
         mov     r7, #sys_ioctl
-        swi     0
+        svc     0
         ldr     r0, [r2]                @ winsize.ws_row
         ldmfd   sp!, {r1-r2, r7, pc}    @ return
 
@@ -1211,7 +1212,7 @@ fwopen:
     1:
         mov     r2, #0644               @ 第３引数 mode
         mov     r7, #sys_open           @ システムコール番号
-        swi     0
+        svc     0
         tst     r0, r0                  @ r0 <- fd
         ldmfd   sp!, {r1, r2, r7, pc}
 
@@ -1224,7 +1225,7 @@ fo_mode:    .long   O_CREAT | O_WRONLY | O_TRUNC
 fclose:
         stmfd   sp!, {r7, lr}
         mov     r7, #sys_close
-        swi     0
+        svc     0
         ldmfd   sp!, {r7, pc}
 
 @==============================================================
@@ -1308,7 +1309,7 @@ ru_oublock:         .long   1       @ block output operations
 ru_msgsnd:          .long   1       @ messages sent
 ru_msgrcv:          .long   1       @ messages received
 ru_nsignals:        .long   1       @ signals received
-ru_nvcsw:           .long   1       @ voluntary context switches
+ru_nvcsw:           .long   1       @ voluntary context svctches
 ru_nivcsw:          .long   1       @ involuntary
 
                     .align 2

@@ -2,7 +2,8 @@
 @  file : fblib.s
 @  2003/10/05
 @  2013/04/25 arm eabi, linux 3.6 
-@  Copyright (C) 2003-2013  Jun Mizutani <mizutani.jun@nifty.ne.jp>
+@  2015/11/12 Change the mnemonic of SWI instruction to SVC 
+@  Copyright (C) 2003-2015  Jun Mizutani <mizutani.jun@nifty.ne.jp>
 @-------------------------------------------------------------------------
 
 .ifndef __FBLIB
@@ -39,7 +40,7 @@ fbdev_open:
         mov     r1, #O_RDWR             @ flag
         mov     r2, #0                  @ mode
         mov     r7, #sys_open
-        swi     0
+        svc     0
         ldr     r1, fb_desc
         str     r0, [r1]                @ save fd
         cmp     r0, #0
@@ -56,7 +57,7 @@ fbdev_close:
         ldr     r1, fb_desc             @ close /dev/fb0
         ldr     r0, [r1]
         mov     r7, #sys_close
-        swi     0
+        svc     0
         tst     r0, r0
         ldmfd   sp!, {r0, r1, r7, pc}   @ return
 
@@ -70,7 +71,7 @@ fb_get_fscreen:
         ldr     r1, =FBIOGET_FSCREENINFO
         ldr     r2, fscinfo             @ 保存先指定
         mov     r7, #sys_ioctl
-        swi     0
+        svc     0
         cmp     r0, #0
         ldmfd   sp!, {r0-r2, r7, pc}    @ return
 
@@ -84,7 +85,7 @@ fb_get_screen:
         ldr     r1, =FBIOGET_VSCREENINFO
         ldr     r2, scinfsave           @ 保存先指定
         mov     r7, #sys_ioctl
-        swi     0
+        svc     0
         cmp     r0, #0
         ldmfd   sp!, {r0-r2, r7, pc}    @ return
 
@@ -98,7 +99,7 @@ fb_set_screen:
         ldr     r1, =FBIOPUT_VSCREENINFO
         ldr     r2, scinfdata           @ 設定済みデータ
         mov     r7, #sys_ioctl
-        swi     0
+        svc     0
         cmp     r0, #0
         ldmfd   sp!, {r0-r2, r7, pc}    @ return
 
@@ -137,7 +138,7 @@ fb_map_screen:
         ldr     r4, [r5]                @ fd
         mov     r5, #0
         mov     r7, #sys_mmap2          @ 192
-        swi     0
+        svc     0
 	str     r0, [r6]                @ fb_addr
         cmp     r0, #0
         rsbmi   r1, r0, #0              @ if r0 < 0 then r1 = -r0 
@@ -153,7 +154,7 @@ fb_unmap_screen:
         ldr     r0, [r2]                @ adr
         ldr     r1, [r2, #+4]           @ len
         mov     r7, #sys_munmap
-        swi     0
+        svc     0
         tst     r0, r0
         ldmfd   sp!, {r0-r2, r7, pc}    @ return
 
@@ -167,7 +168,7 @@ fb_restore_sc:
         ldr     r1, =FBIOPUT_VSCREENINFO
         ldr     r2, scinfsave
         mov     r7, #sys_ioctl
-        swi     0
+        svc     0
         tst     r0, r0
         ldmfd   sp!, {r0-r2, r7, pc}    @ return
 

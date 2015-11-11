@@ -6,6 +6,7 @@
 @ 2012/10/25 fix |fbo, UTF-8, ASLR
 @ 2013/04/25 fix |fbo for linux 3.6
 @ 2015/10/05 fix Environment variables (\\e), added |rt, |vc
+@ 2015/11/12 change the mnemonic of SWI instruction to SVC
 @ Copyright (C) 2003-2015 Jun Mizutani <mizutani.jun@nifty.ne.jp>
 @ rvtl.s may be copied under the terms of the GNU General Public License.
 @-------------------------------------------------------------------------
@@ -116,7 +117,7 @@ _start:
 
         mov     r0, #0              @ 0 を渡して現在値を得る
         mov     r7, #sys_brk        @ brk取得
-        swi     0
+        svc     0
         mov     r2, r0
         mov     r1, #',             @ プログラム先頭 (,)
         str     r0, [fp, r1,LSL #2]
@@ -129,7 +130,7 @@ _start:
         add     r0, r0, r1          @ 初期ヒープ最終
         mov     r1, #'*             @ RAM末設定 (*)
         str     r0, [fp, r1,LSL #2]
-        swi     0                   @ brk設定
+        svc     0                   @ brk設定
         mvn     r3, #0              @ -1
         str     r3, [r2]            @ コード末マーク
 
@@ -152,17 +153,17 @@ _start:
         mov     r1, r3              @ new_sig
         add     r2, r1, #16         @ old_sig
         mov     r7, #sys_sigaction
-        swi     0
+        svc     0
 
         mov     r0, #SIG_IGN        @ シグナルの無視
         str     r0, [r3]            @ nsa_sighandler
         mov     r0, #SIGTSTP        @ ^Z
         mov     r7, #sys_sigaction
-        swi     0
+        svc     0
 
         @ PIDを取得して保存(initの識別)、pid=1 なら環境変数設定
         mov     r7, #sys_getpid
-        swi     0
+        svc     0
         str     r0, [fp, #-24]      @ pid の保存
         cmp     r0, #1
         bne     go
@@ -1393,7 +1394,7 @@ GetTime:
         mov     r0, r3
         add     r1, r3, #8          @ TZ
         mov     r7, #sys_gettimeofday
-        swi     0
+        svc     0
         ldr     r1, [r3]            @ sec
         ldr     r0, [r3, #4]        @ usec
         mov     r2, #'%'            @ 剰余に usec を保存
@@ -1423,7 +1424,7 @@ Com_USleep:
         mov     r3, r0
         mov     v2, r0              @ 第6引数 NULL
         ldr     r7, SYS_PSELECT6
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {v1-v2, r7, pc}
 
@@ -2247,7 +2248,7 @@ READ_FILE:
         ldr     r0, [fp, #-8]       @ FileDesc
         mov     r2, #1              @ 読みこみバイト数
         mov     r7, #sys_read       @ ファイルから読みこみ
-        swi     0
+        svc     0
         tst     r0, r0
         beq     2f                  @ EOF ?
 
@@ -2696,7 +2697,7 @@ Com_BRK:
         stmfd   sp!, {r7, lr}
         bl      SkipEqualExp        @ = を読み飛ばした後 式の評価
         mov     r7, #sys_brk        @ メモリ確保
-        swi     0
+        svc     0
         mov     r1, #'*'            @ ヒープ先頭
         str     r0, [fp, r1,LSL #2]
         ldmfd   sp!, {r7, pc}
@@ -2854,7 +2855,7 @@ Com_CdWrite:
         mov     r1, r0              @ バッファアドレス
         ldr     r0, [fp, #-12]      @ FileDescW
         mov     r7, #sys_write      @ システムコール
-        swi     0
+        svc     0
         b       1b                  @ 次行処理
     4: @ exit:
         ldmfd   sp!, {v3}
@@ -2956,7 +2957,7 @@ Com_FileWrite:
         sub     r2, r3, r1          @ 書き込みサイズ
         ldr     r0, [fp, #-12]      @ FileDescW
         mov     r7, #sys_write      @ システムコール
-        swi     0
+        svc     0
         bl      fclose
     3: @ exit:
         ldmfd   sp!, {r7, pc}
@@ -2984,14 +2985,14 @@ Com_FileRead:
         mov     r1, #0              @ 第２引数 : offset = 0
         mov     r2, #SEEK_END       @ 第３引数 : origin
         mov     r7, #sys_lseek      @ ファイルサイズを取得
-        swi     0
+        svc     0
 
         mov     r3, r0              @ file_size 退避
         ldr     r0, [fp, #-12]      @ 第１引数 : fd
         mov     r1, #0              @ 第２引数 : offset=0
         mov     r2, r1              @ 第３引数 : origin=0
         mov     r7, #sys_lseek      @ ファイル先頭にシーク
-        swi     0
+        svc     0
 
         mov     r0, #'{'            @ 格納領域先頭
         ldr     r1, [fp, r0,LSL #2] @ バッファ指定
@@ -3007,7 +3008,7 @@ Com_FileRead:
 
         ldr     r0, [fp, #-12]      @ FileDescW
         mov     r7, #sys_read       @ ファイル全体を読みこみ
-        swi     0
+        svc     0
         mov     r2, r0
         ldr     r0, [fp, #-12]      @ FileDescW
         bl      fclose
@@ -3099,7 +3100,7 @@ Com_Exec:
         @ パイプ不要の場合
         stmfd   sp!, {r7}           @ save v4
         mov     r7, #sys_fork       @ システムコール
-        swi     0
+        svc     0
         ldmfd   sp!, {r7}           @ restore v4
         tst     r0, r0
         beq     child               @ pid が 0 なら子プロセス
@@ -3110,13 +3111,13 @@ Com_Exec:
         ldr     v3, ipipe           @ パイプをオープン
         mov     r0, v3              @ v3 に pipe_fd 配列先頭
         mov     r7, #sys_pipe       @ pipe システムコール
-        swi     0
+        svc     0
 
         @------------------------------------------------------------
         @ fork
         @------------------------------------------------------------
         mov     r7, #sys_fork       @ システムコール
-        swi     0
+        svc     0
         ldmfd   sp!, {r7}           @ restore v4
         tst     r0, r0
         beq     child               @ pid が 0 なら子プロセス
@@ -3148,7 +3149,7 @@ Com_Exec:
         ldr     r3, ru              @ rusage
         stmfd   sp!, {r7}           @ save v4
         mov     r7, #sys_wait4      @ システムコール
-        swi     0
+        svc     0
         ldmfd   sp!, {r7}
         bl      SET_TERMIOS         @ 子プロセスの設定を復帰
         ldmfd   sp!, {v1-v4}
@@ -3168,7 +3169,7 @@ child:
         mov     ip, r0
         mov     r1, #1              @ 標準出力をファイルに差替え
         mov     r7, #sys_dup2       @ dup2 システムコール
-        swi     0
+        svc     0
         mov     r0, ip
         bl      fclose              @ r0 にはオープンしたfd
         b       pipe_in
@@ -3177,7 +3178,7 @@ pipe_out:                           @ 標準出力をパイプに
         ldr     r0, [v3, #+4]       @ 新パイプの書込み fd
         mov     r1, #1              @ 標準出力
         mov     r7, #sys_dup2       @ dup2 システムコール
-        swi     0
+        svc     0
         bl      close_new_pipe
 
 pipe_in:
@@ -3187,7 +3188,7 @@ pipe_in:
         ldr     r0, [v3, #+8]       @ 前のパイプの読出し fd
         mov     r1, #0              @ new_fd 標準入力
         mov     r7, #sys_dup2       @ dup2 システムコール
-        swi     0
+        svc     0
         bl      close_old_pipe
 
 execve:
@@ -3196,7 +3197,7 @@ execve:
         ldr     r2, exarg2          @
         ldr     r2, [r2, #-12]      @ char ** envp
         mov     r7, #sys_execve     @ システムコール
-        swi     0
+        svc     0
         bl      CheckError          @ 正常ならここには戻らない
         bl      Exit                @ 単なる飾り
 
@@ -3407,7 +3408,7 @@ func_cd:
         bl      OutAsciiZ
         bl      NewLine
         mov     r7, #sys_chdir      @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 func_cm:
@@ -3418,7 +3419,7 @@ func_cm:
         bl      Oct2Bin
         mov     r1, r0
         mov     r7, #sys_chmod      @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 func_cr:
@@ -3429,7 +3430,7 @@ func_cr:
         bl      OutAsciiZ
         bl      NewLine
         mov     r7, #sys_chroot     @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 func_cw:
@@ -3439,7 +3440,7 @@ func_cw:
         mov     r3, r0              @ save r0
         mov     r1, #FNAMEMAX
         mov     r7, #sys_getcwd     @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         mov     r0, r3              @ restore r0
         bl      OutAsciiZ
@@ -3463,7 +3464,7 @@ func_ex:
         ldr     r2, exarg2          @
         ldr     r2, [r2, #-12]      @ char ** envp
         mov     r7, #sys_execve     @ システムコール
-        swi     0
+        svc     0
         bl      CheckError          @ 正常ならここには戻らない
         bl      SET_TERMIOS         @ 端末のローカルエコーをOFF
         ldmfd   sp!, {pc}
@@ -3519,7 +3520,7 @@ func_ls:
         mov     v1, r1              @ v1 : struct top (dir_ent)
         ldr     r2, size_dir_ent2
         mov     r7, #sys_getdents   @ システムコール
-        swi     0
+        svc     0
         tst     r0, r0              @ valid buffer length
         bmi     6f
         beq     7f
@@ -3583,7 +3584,7 @@ func_md:
         bl      Oct2Bin
         mov     r1, r0
         mov     r7, #sys_mkdir      @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3604,7 +3605,7 @@ func_mo:
     1:
         mov     r4, #0              @ void * data
         mov     r7, #sys_mount      @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 func_mv:
@@ -3613,7 +3614,7 @@ func_mv:
         ldr     r0, [r1]
         ldr     r1, [r1, #4]
         mov     r7, #sys_rename     @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3633,7 +3634,7 @@ func_pv:
         ldr     r0, [r1]
         ldr     r1, [r1, #4]
         mov     r7, #sys_pivot_root @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3656,7 +3657,7 @@ func_rd:
         bl      FuncBegin           @ char ** argp
         ldr     r0, [r1]
         mov     r7, #sys_rmdir      @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3665,7 +3666,7 @@ func_rm:
         bl      FuncBegin           @ char ** argp
         ldr     r0, [r1]
         mov     r7, #sys_unlink     @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3696,7 +3697,7 @@ func_sf:
         bl      FuncBegin           @ const char * specialfile
         ldr     r0, [r1]
         mov     r7, #sys_swapoff    @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3706,7 +3707,7 @@ func_so:
         ldr     r0, [r1]            @ const char * specialfile
         mov     r1, #0              @ int swap_flags
         mov     r7, #sys_swapon     @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3714,7 +3715,7 @@ func_sy:
         adr     r0, msg_f_sy        @ |sy
         bl      OutAsciiZ
         mov     r7, #sys_sync       @ システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3736,7 +3737,7 @@ func_um:
         ldr     r0, [r1]            @ dev_name
         mov     r1, #2              @ MNT_DETACH = 0x00000002
         mov     r7, #sys_umount2    @ sys_umount2 システムコール
-        swi     0
+        svc     0
         bl      CheckError
         ldmfd   sp!, {pc}
 
@@ -3995,13 +3996,13 @@ DispFile:
     1:
         mov     r0, r3              @ r0  fd
         mov     r7, #sys_read
-        swi     0
+        svc     0
         tst     r0, r0
         beq     2f
         mov     r2, r0              @ r2  length
         mov     r0, #1              @ r0  stdout
         mov     r7, #sys_write
-        swi     0
+        svc     0
         b       1b
     2:
         ldmfd   sp!, {r0}

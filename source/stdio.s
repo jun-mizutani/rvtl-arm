@@ -2,7 +2,8 @@
 @ Standard I/O Subroutine for ARM
 @   2003/09/22
 @   2009/03/13 arm eabi system call
-@ Copyright (C) 2003-2009  Jun Mizutani <mizutani.jun@nifty.ne.jp>
+@   2015/11/12 Change the mnemonic of SWI instruction to SVC
+@ Copyright (C) 2003-2015  Jun Mizutani <mizutani.jun@nifty.ne.jp>
 @ stdio.s may be copied under the terms of the GNU General Public License.
 @ ------------------------------------------------------------------------
 
@@ -22,14 +23,14 @@ __STDIO = 1
 Exit:
         mov     r0, #0
         mov     r7, #sys_exit
-        swi     0
+        svc     0
         mov     pc, lr
 
 @------------------------------------
 @ exit with r0
 ExitN:
         mov     r7, #sys_exit
-        swi     0
+        svc     0
         mov     pc, lr
 
 
@@ -42,7 +43,7 @@ OutString:
         mov     r1, r0                  @ a1  string address
         mov     r0, #1                  @ a0  stdout
         mov     r7, #sys_write
-        swi     0
+        svc     0
         ldmfd   sp!, {r0-r2, r7, pc}    @ return
 
 @------------------------------------
@@ -85,7 +86,7 @@ OutChar:
         mov     r0, #1                  @ r0  stdout
         mov     r2, r0                  @ r2  length
         mov     r7, #sys_write
-        swi     0
+        svc     0
         ldmfd   sp!, {r0-r2, r7, pc}    @ pop & return
 
 @------------------------------------
@@ -342,7 +343,7 @@ InChar:
         mov     r0, #0                  @ r0  stdin
         mov     r2, #1                  @ r2  length
         mov     r7, #sys_read
-        swi     0
+        svc     0
         ldmfd   sp!, {r0-r2, r7, pc}    @ pop & return
 
 @------------------------------------

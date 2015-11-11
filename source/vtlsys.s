@@ -3,7 +3,8 @@
 @  2003/10/19
 @  2009/03/13 arm eabi
 @  2015/08/30 6th arg
-@  Copyright (C) 2003-2009 Jun Mizutani <mizutani.jun@nifty.ne.jp>
+@  2015/11/12 Change the mnemonic of SWI instruction to SVC
+@  Copyright (C) 2003-2015 Jun Mizutani <mizutani.jun@nifty.ne.jp>
 @-------------------------------------------------------------------------
 
 .text
@@ -28,6 +29,6 @@ SystemCall:                         @ fp=v8=r11
         ldr     r4, [fp, v6,LSL #2] @ r4=システムコール引数5
         mov     v6, #'g             @ g にシステムコール引数6
         ldr     r5, [fp, v6,LSL #2] @ r4=システムコール引数6
-        swi     0
+        svc     0
     1:  ldmfd   sp!, {r1-r5, r7, v6, pc}
 
