@@ -1382,7 +1382,7 @@ Exp:
         ldmfd   sp!, {r1, pc}       @ return
 
 equal_err:
-        .asciz   "\n= reqiured."
+        .asciz   "\n= required."
         .align   2
 
 @-------------------------------------------------------------------------
